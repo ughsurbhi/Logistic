@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detector</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Spam Email Classifier</h1>
+        <p>Upload a CSV file containing email features, and our AI will detect spam.</p>
+
+        <form id="uploadForm">
+            <input type="file" id="fileInput" name="file" accept=".csv">
+            <button type="submit">📤 Upload & Predict</button>
+        </form>
+
+        <div id="loading" class="hidden">🔄 Processing...</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById("uploadForm").onsubmit = async function(e) {
+            e.preventDefault();
+            let fileInput = document.getElementById("fileInput").files[0];
+
+            if (!fileInput) {
+                alert("⚠️ Please upload a CSV file!");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", fileInput);
+
+            document.getElementById("loading").classList.remove("hidden");
+            document.getElementById("result").innerHTML = "";
+
+            let response = await fetch("/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            let result = await response.json();
+            document.getElementById("loading").classList.add("hidden");
+
+            if (result.error) {
+                document.getElementById("result").innerHTML = `<span class="error">❌ ${result.error}</span>`;
+            } else {
+                document.getElementById("result").innerHTML = 
+                    `<b>📜 Predictions:</b> <br> ${result.predictions.join("<br>")}`;
+            }
+        };
+    </script>
+</body>
+</html>
